@@ -163,6 +163,131 @@ void menuSortirProduk(vector<Produk> &produk)
     } while (pilihanSortir != 0);
 }
 
+// Fungsi untuk menambahkan produk ke keranjang
+void tambahKeKeranjang(const vector<Produk> &produk, Produk keranjang[], int &jumlahKeranjang, const int maxKeranjang)
+{
+    system("cls");
+    if (jumlahKeranjang >= maxKeranjang)
+    {
+        cout << "Keranjang penuh! Tidak dapat menambahkan produk lagi." << endl;
+        return;
+    }
+
+    int idProduk;
+    cout << "Masukkan ID produk yang ingin ditambahkan ke keranjang: ";
+    cin >> idProduk;
+
+    bool ditemukan = false;
+    for (const auto &p : produk)
+    {
+        if (p.id == idProduk)
+        {
+            int kuantitas;
+            cout << "Kuantitas yang ingin ditambah: ";
+            cin >> kuantitas;
+
+            if (kuantitas <= 0)
+            {
+                cout << "Kuantitas tidak valid. Tidak ada produk yang ditambahkan." << endl;
+            }
+            else
+            {
+                for (int i = 0; i < kuantitas && jumlahKeranjang < maxKeranjang; i++)
+                {
+                    keranjang[jumlahKeranjang++] = p;
+                }
+
+                cout << "\nProduk " << p.nama << " berhasil ditambahkan ke keranjang sebanyak "
+                     << kuantitas << " unit!" << endl;
+
+                if (jumlahKeranjang >= maxKeranjang)
+                {
+                    cout << "\nKeranjang telah mencapai kapasitas maksimum." << endl;
+                }
+            }
+
+            ditemukan = true;
+            break;
+        }
+    }
+
+    if (!ditemukan)
+    {
+        cout << "\nProduk dengan ID " << idProduk << " tidak ditemukan." << endl;
+    }
+
+    int pilihanMenu1;
+    do
+    {
+        cout << "\n==========================================================================" << endl;
+        cout << "1. Tambah produk lain ke keranjang" << endl;
+        cout << "2. Kembali ke Menu Utama" << endl;
+        cout << "Masukkan pilihan: ";
+        cin >> pilihanMenu1;
+
+        if (pilihanMenu1 == 1)
+        {
+            tambahKeKeranjang(produk, keranjang, jumlahKeranjang, maxKeranjang);
+            break;
+        }
+        else if (pilihanMenu1 == 2)
+        {
+            break;
+        }
+        else
+        {
+            cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
+        }
+    } while (pilihanMenu1 != 1 && pilihanMenu1 != 2);
+}
+
+// Fungsi untuk mencari produk berdasarkan ID yang diinput
+void cariProdukByID(const vector<Produk> &produk)
+{
+    int idProduk;
+    cout << "Masukkan ID produk yang ingin dicari: ";
+    cin >> idProduk;
+
+    bool ditemukan = false;
+    for (const auto &p : produk)
+    {
+        if (p.id == idProduk)
+        {
+            cout << "\n======================= Produk Ditemukan ========================" << endl;
+            cout << left << setw(5) << "ID"
+                 << setw(30) << "Nama Produk"
+                 << setw(20) << "Kategori"
+                 << setw(15) << "Harga (Rp)" << endl;
+            cout << "-----------------------------------------------------------------" << endl;
+            cout << left << setw(5) << p.id
+                 << setw(30) << p.nama
+                 << setw(20) << p.kategori
+                 << setw(15) << p.harga << endl;
+            cout << "==================================================================" << endl;
+            ditemukan = true;
+            break;
+        }
+    }
+
+    if (!ditemukan)
+    {
+        cout << "\nProduk dengan ID " << idProduk << " tidak ditemukan." << endl;
+    }
+
+    int pilihanMenu1;
+    do
+    {
+        cout << "\n1. Kembali ke Menu Utama" << endl;
+        cout << "Masukkan pilihan: ";
+        cin >> pilihanMenu1;
+
+        if (pilihanMenu1 != 1)
+        {
+            cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
+        }
+    } while (pilihanMenu1 != 1);
+}
+
 int main()
 {
     vector<Produk> produk = {
@@ -186,6 +311,10 @@ int main()
         {18, "Mie Instan", "Konsumsi", 5000},
         {19, "Susu UHT Indomilk 1 Liter", "Konsumsi", 18000},
         {20, "Teh Kotak Sosro 500ml", "Konsumsi", 7500}};
+
+    const int maxKeranjang = 100;
+    Produk keranjang[maxKeranjang];
+    int jumlahKeranjang = 0;
 
     int pilihan;
 
@@ -216,6 +345,14 @@ int main()
         case 2:
             system("cls");
             menuSortirProduk(produk);
+            break;
+        case 3:
+            system("cls");
+            tambahKeKeranjang(produk, keranjang, jumlahKeranjang, maxKeranjang);
+            break;
+        case 4:
+            system("cls");
+            cariProdukByID(produk);
             break;
         case 0:
             break;
