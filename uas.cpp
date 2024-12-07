@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#define ii pair<int, int>
 using namespace std;
 
 // Struktur produk
@@ -401,6 +402,165 @@ void hapusDariKeranjang(vector<KeranjangItem> &keranjang)
     } while (pilihanMenu1 != 1);
 }
 
+int hitungBiayaPengiriman(int biayaPengiriman) {
+    int tujuan;
+    while (true) {
+        system("cls");
+        cout << "Masukkan titik tujuan (1-9): ";
+        cin >> tujuan;
+        if (tujuan >= 1 && tujuan <= 9) {
+            break;
+        } else {
+            cout << "Input salah! Masukkan titik tujuan antara 1 sampai 9." << endl;
+        }
+    }
+
+    int n = 10; 
+    int m = 13; 
+    vector<vector<ii>> adj(n);
+
+    adj[0].push_back({3, 4});
+    adj[0].push_back({6, 4});
+    adj[0].push_back({2, 7});
+    adj[0].push_back({8, 5});
+    adj[6].push_back({1, 4});
+    adj[6].push_back({4, 2});
+    adj[6].push_back({5, 11});
+    adj[2].push_back({1, 5});
+    adj[8].push_back({5, 10});
+    adj[4].push_back({7, 7});
+    adj[5].push_back({4, 9});
+    adj[5].push_back({7, 8});
+    adj[5].push_back({9, 3});
+    adj[9].push_back({7, 4});
+
+    vector<int> dist(n, INT_MAX); 
+    vector<bool> visited(n, false);
+    vector<int> pred(n, -1);
+    priority_queue<ii, vector<ii>, greater<ii>> pq;
+    dist[0] = 0;
+    pq.push({0, 0});
+
+    while (!pq.empty()) {
+        ii currItem = pq.top(); pq.pop();
+        int currDist = currItem.first;
+        int currNode = currItem.second;
+
+        if (!visited[currNode]) {
+            visited[currNode] = true;
+
+            for (ii it : adj[currNode]) {
+                int v = it.first;
+                int w = it.second;
+                if (dist[currNode] + w < dist[v]) {
+                    dist[v] = dist[currNode] + w;
+                    pred[v] = currNode;
+                    pq.push({dist[v], v});
+                }
+            }
+        }
+    }
+
+    biayaPengiriman = dist[tujuan] * 3000;
+    cout << "Biaya pengiriman dari supermarket ke titik "<< dist[tujuan] << " : Rp." << biayaPengiriman << endl;
+    
+    int pilihan;
+    while (true) {  
+        cout << "\n1. Memperbarui tujuan\n";
+        cout << "2. Simpan tujuan dan kembali ke ke menu utama\n";
+        cout << "Masukkan pilihan: ";
+        cin >> pilihan;
+
+        if (pilihan == 1) {
+            return hitungBiayaPengiriman(biayaPengiriman);
+        } else if (pilihan == 2) {
+            return biayaPengiriman;
+        } else {
+            cout << "Pilihan tidak valid!\n Silakan masukkan pilihan yang benar.\n";
+        }
+    }
+}
+struct RiwayatPembayaran {
+    int id;
+    string nama;
+    int jumlah;
+    int total;
+};
+
+// Fungsi untuk menyimpan riwayat pembayaran
+void simpanRiwayatPembayaran(vector<RiwayatPembayaran> &riwayat, int id, const string &nama, int jumlah, int total) {
+    RiwayatPembayaran riwayatBaru = {id, nama, jumlah, total};
+    riwayat.push_back(riwayatBaru);
+}
+
+// Fungsi untuk melakukan pembayaran
+void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran> &riwayat, int biayaPengiriman) {
+    if (keranjang.empty()) {
+        cout << "Keranjang kosong, tidak ada pembayaran yang perlu dilakukan." << endl;
+        return;
+    }
+    if (biayaPengiriman == 0) {
+        biayaPengiriman = hitungBiayaPengiriman(biayaPengiriman);
+    }
+
+    int totalPembayaran = 0;
+    cout << "\nProses Pembayaran: " << endl;
+    cout << left << setw(5) << "ID"
+         << setw(30) << "Nama Produk"
+         << setw(15) << "Jumlah"
+         << setw(15) << "Subtotal (Rp)" << endl;
+    cout << string(65, '-') << endl;
+
+    for (const auto& item : keranjang) {
+        int subtotal = item.produk.harga * item.jumlah;
+        totalPembayaran += subtotal;
+
+        cout << left << setw(5) << item.produk.id
+             << setw(30) << item.produk.nama
+             << setw(15) << item.jumlah
+             << setw(15) << subtotal << endl;
+    }
+    totalPembayaran += biayaPengiriman;
+    cout << right << setw(50) << "Biaya Pengiriman: Rp" << biayaPengiriman << endl;
+    cout << right << setw(50) << "Total Pembayaran: Rp" << totalPembayaran << endl;
+    cout << string(65, '-') << endl;
+
+    int pilihan;
+    cout << "\n1. Bayar" << endl;
+    cout << "2. Kembali ke menu utama" << endl;
+    cout << "Masukkan pilihan: ";
+    cin >> pilihan;
+
+    if (pilihan == 1) {
+        int totalPembayaran = 0;
+
+        for (const auto& item : keranjang) {
+            int subtotal = item.produk.harga * item.jumlah;
+            totalPembayaran += subtotal;
+
+            simpanRiwayatPembayaran(riwayat, item.produk.id, item.produk.nama, item.jumlah, subtotal);
+        }
+
+        cout << "\nPembayaran berhasil! Total Pembayaran: Rp" << totalPembayaran+biayaPengiriman << endl;
+        keranjang.clear(); 
+        int pilihanMenu1;
+        do
+        {
+            cout << "\n1. Kembali ke Menu Utama" << endl;
+            cout << "Masukkan pilihan: ";
+            cin >> pilihanMenu1;
+
+            if (pilihanMenu1 != 1)
+            {
+                cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
+            }
+        } while (pilihanMenu1 != 1);
+    } else if (pilihan == 2) {
+        return;
+    } else {
+        cout << "\nPilihan tidak valid, coba lagi.\n";
+    }
+}
 
 int main()
 {
@@ -429,6 +589,8 @@ int main()
     vector<KeranjangItem> keranjang;
     int jumlahKeranjang = 0;
     const int maxKeranjang = 100;
+    int biayaPengiriman = 0;
+    vector<RiwayatPembayaran> riwayat;
 
     int pilihan;
 
@@ -468,7 +630,7 @@ int main()
             system("cls");
             cariProdukByID(produk);
             break;
-         case 5:
+        case 5:
             system("cls");
             tampilkanKeranjang(keranjang);
             break;
@@ -476,7 +638,14 @@ int main()
             system("cls");
             hapusDariKeranjang(keranjang);
             break;
-
+        case 7:
+            system("cls");
+            biayaPengiriman = hitungBiayaPengiriman(biayaPengiriman);
+            break;
+        case 8:
+            system("cls");
+            prosesPembayaran(keranjang, riwayat, biayaPengiriman);
+            break;
         case 0:
             break;
         default:
@@ -486,4 +655,4 @@ int main()
     } while (pilihan != 0);
 
     return 0;
-}
+};
