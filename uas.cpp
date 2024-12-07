@@ -10,6 +10,13 @@ struct Produk
     int harga;
 };
 
+// Struktur keranjang belanja
+struct KeranjangItem
+{
+    Produk produk;
+    int jumlah;
+};
+
 class HashTable
 {
 private:
@@ -164,7 +171,7 @@ void menuSortirProduk(vector<Produk> &produk)
 }
 
 // Fungsi untuk menambahkan produk ke keranjang
-void tambahKeKeranjang(const vector<Produk> &produk, Produk keranjang[], int &jumlahKeranjang, const int maxKeranjang)
+void tambahKeKeranjang(const vector<Produk> &produk, vector<KeranjangItem> &keranjang, int &jumlahKeranjang, const int maxKeranjang)
 {
     system("cls");
     if (jumlahKeranjang >= maxKeranjang)
@@ -192,18 +199,25 @@ void tambahKeKeranjang(const vector<Produk> &produk, Produk keranjang[], int &ju
             }
             else
             {
-                for (int i = 0; i < kuantitas && jumlahKeranjang < maxKeranjang; i++)
+                bool sudahAda = false;
+                for (auto &item : keranjang)
                 {
-                    keranjang[jumlahKeranjang++] = p;
+                    if (item.produk.id == p.id)
+                    {
+                        item.jumlah += kuantitas;
+                        sudahAda = true;
+                        break;
+                    }
+                }
+
+                if (!sudahAda && jumlahKeranjang < maxKeranjang)
+                {
+                    keranjang.push_back({p, kuantitas});
+                    jumlahKeranjang++;
                 }
 
                 cout << "\nProduk " << p.nama << " berhasil ditambahkan ke keranjang sebanyak "
                      << kuantitas << " unit!" << endl;
-
-                if (jumlahKeranjang >= maxKeranjang)
-                {
-                    cout << "\nKeranjang telah mencapai kapasitas maksimum." << endl;
-                }
             }
 
             ditemukan = true;
@@ -288,6 +302,106 @@ void cariProdukByID(const vector<Produk> &produk)
     } while (pilihanMenu1 != 1);
 }
 
+// Fungsi untuk menampilkan keranjang belanja
+void tampilkanKeranjang(const vector<KeranjangItem> &keranjang)
+{
+    if (keranjang.empty())
+    {
+        cout << "Keranjang belanja kosong." << endl;
+        int pilihanMenu1;
+        do
+        {
+            cout << "\n1. Kembali ke Menu Utama" << endl;
+            cout << "Masukkan pilihan: ";
+            cin >> pilihanMenu1;
+
+            if (pilihanMenu1 != 1)
+            {
+                cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
+            }
+        }
+        while (pilihanMenu1 != 1);
+        return;
+    }
+
+    cout << "\n========================= Keranjang Belanja =========================" << endl;
+    cout << left << setw(5) << "ID"
+         << setw(30) << "Nama Produk"
+         << setw(15) << "Jumlah"
+         << setw(15) << "Harga Total (Rp)" << endl;
+
+    int grandTotal = 0;
+
+    for (const auto &item : keranjang)
+    {
+        int totalHarga = item.produk.harga * item.jumlah;
+
+        cout << left << setw(5) << item.produk.id
+             << setw(30) << item.produk.nama
+             << setw(15) << item.jumlah
+             << setw(15) << totalHarga << endl;
+
+        grandTotal += totalHarga;
+    }
+
+    cout << "=====================================================================" << endl;
+    cout << "Total Belanja: Rp " << grandTotal << endl;
+
+    int pilihanMenu1;
+    do
+    {
+        cout << "\n1. Kembali ke Menu Utama" << endl;
+        cout << "Masukkan pilihan: ";
+        cin >> pilihanMenu1;
+
+        if (pilihanMenu1 != 1)
+        {
+            cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
+        }
+    } while (pilihanMenu1 != 1);
+}
+
+// Fungsi untuk menghapus barang dari keranjang belanja berdasarkan ID
+void hapusDariKeranjang(vector<KeranjangItem> &keranjang)
+{
+    int idProduk;
+    cout << "Masukkan ID produk yang ingin dihapus dari keranjang belanja: ";
+    cin >> idProduk;
+
+    auto it = keranjang.begin();
+    bool ditemukan = false;
+    while (it != keranjang.end())
+    {
+        if (it->produk.id == idProduk)
+        {
+            keranjang.erase(it);
+            cout << "Produk dengan ID " << idProduk << " berhasil dihapus dari keranjang belanja." << endl;
+            ditemukan = true;
+            break;
+        }
+        ++it;
+    }
+
+    if (!ditemukan)
+    {
+        cout << "Produk dengan ID " << idProduk << " tidak ditemukan di keranjang belanja." << endl;
+    }
+
+    int pilihanMenu1;
+    do
+    {
+        cout << "\n1. Kembali ke Menu Utama" << endl;
+        cout << "Masukkan pilihan: ";
+        cin >> pilihanMenu1;
+
+        if (pilihanMenu1 != 1)
+        {
+            cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
+        }
+    } while (pilihanMenu1 != 1);
+}
+
+
 int main()
 {
     vector<Produk> produk = {
@@ -312,9 +426,9 @@ int main()
         {19, "Susu UHT Indomilk 1 Liter", "Konsumsi", 18000},
         {20, "Teh Kotak Sosro 500ml", "Konsumsi", 7500}};
 
-    const int maxKeranjang = 100;
-    Produk keranjang[maxKeranjang];
+    vector<KeranjangItem> keranjang;
     int jumlahKeranjang = 0;
+    const int maxKeranjang = 100;
 
     int pilihan;
 
@@ -324,10 +438,10 @@ int main()
         cout << "\n=== Aplikasi Toko Online Fantastic Five ===" << endl;
         cout << "1. Tampilkan Semua Produk" << endl;
         cout << "2. Menu Sortir Produk" << endl;
-        cout << "3. Tambah Produk ke Keranjang" << endl;
+        cout << "3. Tambah Produk ke Keranjang Belanja" << endl;
         cout << "4. Mencari Produk Berdasarkan ID" << endl;
         cout << "5. Tampilkan Keranjang Belanja" << endl;
-        cout << "6. Menghapus Barang di Keranjang" << endl;
+        cout << "6. Menghapus Barang di Keranjang Belanja" << endl;
         cout << "7. Menghitung Biaya Pengiriman Berdasarkan Jarak" << endl;
         cout << "8. Melakukan Pembayaran dan Menyimpan Riwayat Pembayaran" << endl;
         cout << "9. Melihat Riwayat Pembayaran" << endl;
@@ -354,6 +468,15 @@ int main()
             system("cls");
             cariProdukByID(produk);
             break;
+         case 5:
+            system("cls");
+            tampilkanKeranjang(keranjang);
+            break;
+        case 6:
+            system("cls");
+            hapusDariKeranjang(keranjang);
+            break;
+
         case 0:
             break;
         default:
