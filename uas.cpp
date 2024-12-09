@@ -504,7 +504,7 @@ void simpanRiwayatPembayaran(vector<RiwayatPembayaran>& riwayat, int id, const s
     cout << "Waktu Pembayaran: " << waktuPembayaran << endl;
 }
 
-void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran> &riwayat, int biayaPengiriman) {
+void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran> &riwayat, int biayaPengiriman, int &indeksPembayaran) {
     if (keranjang.empty()) {
         cout << "Keranjang kosong, tidak ada pembayaran yang perlu dilakukan." << endl;
         return;
@@ -523,7 +523,6 @@ void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran
          << setw(15) << "Subtotal (Rp)" << endl;
     cout << string(65, '-') << endl;
 
-    // Menampilkan informasi produk dalam keranjang dan menghitung total
     for (const auto& item : keranjang) {
         int subtotal = item.produk.harga * item.jumlah;
         totalPembayaran += subtotal;
@@ -534,19 +533,16 @@ void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran
              << setw(15) << subtotal << endl;
     }
 
-    // Menambahkan biaya pengiriman ke total pembayaran
     totalPembayaran += biayaPengiriman;
     cout << right << setw(50) << "Biaya Pengiriman: Rp" << biayaPengiriman << endl;
     cout << right << setw(50) << "Total Pembayaran: Rp" << totalPembayaran << endl;
     cout << string(65, '-') << endl;
 
-    // Meminta nama pembeli
     string namaPembeli;
     cout << "Masukkan Nama Pembeli: ";
-    cin.ignore();  // Mengabaikan newline sebelumnya agar getline berfungsi dengan benar
+    cin.ignore();
     getline(cin, namaPembeli);
 
-    // Proses pembayaran
     int pilihan;
     cout << "\n1. Bayar" << endl;
     cout << "2. Kembali ke menu utama" << endl;
@@ -554,20 +550,16 @@ void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran
     cin >> pilihan;
 
     if (pilihan == 1) {
-        // Mendapatkan waktu saat ini
         time_t sekarang = time(0);
         char* dt = ctime(&sekarang);
         string waktuPembayaran = dt;
 
-        // Menyimpan riwayat pembayaran dan menghitung ulang total pembayaran
-        simpanRiwayatPembayaran(riwayat, 1, namaPembeli, keranjang, totalPembayaran, waktuPembayaran);
+        simpanRiwayatPembayaran(riwayat, indeksPembayaran++, namaPembeli, keranjang, totalPembayaran, waktuPembayaran);
 
-        cout << "\nPembayaran berhasil! Total Pembayaran: Rp" << totalPembayaran + biayaPengiriman << endl;
+        cout << "\nPembayaran berhasil! Total Pembayaran: Rp" << totalPembayaran << endl;
 
-        // Hapus produk dari keranjang setelah pembayaran berhasil
         keranjang.clear();
 
-        // Pilihan untuk kembali ke menu utama setelah pembayaran
         int pilihanMenu1;
         do {
             cout << "\n1. Kembali ke Menu Utama" << endl;
@@ -617,43 +609,50 @@ void tampilkanRiwayatPembayaran(const vector<RiwayatPembayaran>& riwayat) {
     } while (pilihanMenu1 != 1);
 }
 
-// Fungsi untuk menampilkan detail riwayat pembayaran
 void tampilkanDetailRiwayatPembayaran(const vector<RiwayatPembayaran>& riwayat) {
-    int index;
-    cout << "Masukkan index riwayat pembayaran yang ingin ditampilkan: ";
-    cin >> index;
-    if (index < 0 || index >= riwayat.size()) {
-    cout << "Index tidak valid. Silakan coba lagi." << endl;
-    return;
+    if (riwayat.empty()) {
+        cout << "Tidak ada riwayat pembayaran untuk ditampilkan." << endl;
+        return;
     }
 
-    if (index >= 0 && index < riwayat.size()) {
-        const RiwayatPembayaran& pembayaran = riwayat[index];
-        cout << "ID Pembayaran: " << pembayaran.id << endl;
-        cout << "Nama Pembeli: " << pembayaran.nama << endl;
-        cout << "Jumlah Barang: " << pembayaran.jumlahBarang << endl;
-        cout << "Total Pembayaran: " << pembayaran.total << endl;
-        cout << "Waktu Pembayaran: " << pembayaran.waktuPembayaran << endl;
+    cout << "Masukkan index riwayat pembayaran yang ingin ditampilkan: ";
+    int index;
+    cin >> index;
+    index -= 1;
 
-        cout << "\nDaftar Barang yang Dibeli: " << endl;
-        for (const auto& item : pembayaran.barangDibeli) {
-            cout << "Produk: " << item.produk.nama
-                 << " Jumlah: " << item.jumlah
-                 << " Harga: Rp" << item.produk.harga << endl;
-        }
-    } else {
-        cout << "Index riwayat tidak valid." << endl;
+    if (index < 0 || index >= riwayat.size()) {
+        cout << "Index tidak valid. Silakan coba lagi." << endl;
+        return;
+    }
+
+    const RiwayatPembayaran& pembayaran = riwayat[index];
+
+    // Membuat hash berdasarkan beberapa atribut
+    string hashInput = to_string(pembayaran.id) + pembayaran.nama + pembayaran.waktuPembayaran;
+    std::hash<string> hashFunction;
+    size_t hashValue = hashFunction(hashInput);
+
+    cout << "ID Pembayaran: " << pembayaran.id << endl;
+    cout << "Nama Pembeli: " << pembayaran.nama << endl;
+    cout << "Jumlah Barang: " << pembayaran.jumlahBarang << endl;
+    cout << "Total Pembayaran: " << pembayaran.total << endl;
+    cout << "Waktu Pembayaran: " << pembayaran.waktuPembayaran << endl;
+    cout << "Token Transaksi: " << hashValue << endl; // Menampilkan hash transaksi
+
+    cout << "\nDaftar Barang yang Dibeli: " << endl;
+    for (const auto& item : pembayaran.barangDibeli) {
+        cout << "Produk: " << item.produk.nama
+             << " Jumlah: " << item.jumlah
+             << " Harga: Rp" << item.produk.harga << endl;
     }
 
     int pilihanMenu1;
-    do
-    {
+    do {
         cout << "\n1. Kembali ke Menu Utama" << endl;
         cout << "Masukkan pilihan: ";
         cin >> pilihanMenu1;
 
-        if (pilihanMenu1 != 1)
-        {
+        if (pilihanMenu1 != 1) {
             cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
         }
     } while (pilihanMenu1 != 1);
@@ -688,6 +687,7 @@ int main()
     const int maxKeranjang = 100;
     int biayaPengiriman = 0;
     vector<RiwayatPembayaran> riwayat;
+    int indeksPembayaran = 1;
 
     int pilihan;
 
@@ -741,24 +741,28 @@ int main()
             break;
         case 8:
             system("cls");
-            prosesPembayaran(keranjang, riwayat, biayaPengiriman);
+            prosesPembayaran(keranjang, riwayat, biayaPengiriman, indeksPembayaran);
             break;
         case 9:
-            // system("cls");
+            system("cls");
             if (riwayat.empty()) {
                 cout << "Tidak ada riwayat pembayaran." << endl;
+                cin.ignore(); // Mengabaikan karakter sebelumnya di buffer (jika ada)
+                cin.get();    // Menunggu pengguna menekan Enter
             } else {
                 tampilkanRiwayatPembayaran(riwayat);
             }
+
             break;
         case 10:
-            // system("cls");
+            system("cls");
             if (riwayat.empty()) {
                 cout << "Tidak ada riwayat pembayaran." << endl;
+                cin.ignore(); // Mengabaikan karakter sebelumnya di buffer (jika ada)
+                cin.get();    // Menunggu pengguna menekan Enter
             } else {
                 tampilkanDetailRiwayatPembayaran(riwayat);  // Hanya riwayat sebagai parameter
-            }            
-            break;
+            }
         case 0:
             break;
         default:
