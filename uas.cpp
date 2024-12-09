@@ -2,7 +2,7 @@
 #define ii pair<int, int>
 using namespace std;
 
-// Struktur produk
+
 struct Produk
 {
     int id;
@@ -11,7 +11,6 @@ struct Produk
     int harga;
 };
 
-// Struktur keranjang belanja
 struct KeranjangItem
 {
     Produk produk;
@@ -21,10 +20,10 @@ struct KeranjangItem
 struct RiwayatPembayaran {
     int id;
     string nama;
-    int jumlahBarang; // jumlah barang dalam pembayaran
-    int total;        // total harga
-    string waktuPembayaran; // waktu pembayaran
-    vector<KeranjangItem> barangDibeli; // produk yang dibeli
+    int jumlahBarang; 
+    int total;      
+    string waktuPembayaran; 
+    vector<KeranjangItem> barangDibeli; 
 };
 
 
@@ -266,35 +265,36 @@ void tambahKeKeranjang(const vector<Produk> &produk, vector<KeranjangItem> &kera
     } while (pilihanMenu1 != 1 && pilihanMenu1 != 2);
 }
 
-// Fungsi untuk mencari produk berdasarkan ID yang diinput
+//Fungsi untuk mencari peroduk berdasarkan id
 void cariProdukByID(const vector<Produk> &produk)
 {
     int idProduk;
     cout << "Masukkan ID produk yang ingin dicari: ";
     cin >> idProduk;
 
-    bool ditemukan = false;
+    unordered_map<int, Produk> produkMap;
+
     for (const auto &p : produk)
     {
-        if (p.id == idProduk)
-        {
-            cout << "\n======================= Produk Ditemukan ========================" << endl;
-            cout << left << setw(5) << "ID"
-                 << setw(30) << "Nama Produk"
-                 << setw(20) << "Kategori"
-                 << setw(15) << "Harga (Rp)" << endl;
-            cout << "-----------------------------------------------------------------" << endl;
-            cout << left << setw(5) << p.id
-                 << setw(30) << p.nama
-                 << setw(20) << p.kategori
-                 << setw(15) << p.harga << endl;
-            cout << "==================================================================" << endl;
-            ditemukan = true;
-            break;
-        }
+        produkMap[p.id] = p; 
     }
 
-    if (!ditemukan)
+    if (produkMap.find(idProduk) != produkMap.end())
+    {
+        Produk p = produkMap[idProduk];
+        cout << "\n======================= Produk Ditemukan ========================" << endl;
+        cout << left << setw(5) << "ID"
+             << setw(30) << "Nama Produk"
+             << setw(20) << "Kategori"
+             << setw(15) << "Harga (Rp)" << endl;
+        cout << "-----------------------------------------------------------------" << endl;
+        cout << left << setw(5) << p.id
+             << setw(30) << p.nama
+             << setw(20) << p.kategori
+             << setw(15) << p.harga << endl;
+        cout << "==================================================================" << endl;
+    }
+    else
     {
         cout << "\nProduk dengan ID " << idProduk << " tidak ditemukan." << endl;
     }
@@ -472,8 +472,8 @@ int hitungBiayaPengiriman(int biayaPengiriman) {
     }
 
     biayaPengiriman = dist[tujuan] * 3000;
-    cout << "Biaya pengiriman dari supermarket ke titik "<< dist[tujuan] << " : Rp." << biayaPengiriman << endl;
-    
+    cout << "Biaya pengiriman dari supermarket ke titik " << tujuan << " : Rp." << biayaPengiriman << endl;
+
     int pilihan;
     while (true) {  
         cout << "\n1. Memperbarui tujuan\n";
@@ -615,13 +615,13 @@ void tampilkanDetailRiwayatPembayaran(const vector<RiwayatPembayaran>& riwayat) 
         return;
     }
 
-    cout << "Masukkan index riwayat pembayaran yang ingin ditampilkan: ";
+    cout << "Masukkan ID riwayat pembayaran yang ingin ditampilkan: ";
     int index;
     cin >> index;
     index -= 1;
 
     if (index < 0 || index >= riwayat.size()) {
-        cout << "Index tidak valid. Silakan coba lagi." << endl;
+        cout << "ID tidak valid. Silakan coba lagi." << endl;
         return;
     }
 
@@ -747,8 +747,8 @@ int main()
             system("cls");
             if (riwayat.empty()) {
                 cout << "Tidak ada riwayat pembayaran." << endl;
-                cin.ignore(); // Mengabaikan karakter sebelumnya di buffer (jika ada)
-                cin.get();    // Menunggu pengguna menekan Enter
+                cin.ignore();
+                cin.get();    
             } else {
                 tampilkanRiwayatPembayaran(riwayat);
             }
@@ -758,10 +758,9 @@ int main()
             system("cls");
             if (riwayat.empty()) {
                 cout << "Tidak ada riwayat pembayaran." << endl;
-                cin.ignore(); // Mengabaikan karakter sebelumnya di buffer (jika ada)
-                cin.get();    // Menunggu pengguna menekan Enter
-            } else {
-                tampilkanDetailRiwayatPembayaran(riwayat);  // Hanya riwayat sebagai parameter
+                cin.ignore(); 
+                cin.get();  
+                tampilkanDetailRiwayatPembayaran(riwayat); 
             }
         case 0:
             break;
