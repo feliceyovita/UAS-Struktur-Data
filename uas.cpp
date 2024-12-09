@@ -496,9 +496,14 @@ void simpanRiwayatPembayaran(vector<RiwayatPembayaran>& riwayat, int id, const s
     // Membuat riwayat baru dan menyimpannya ke dalam vector riwayat
     RiwayatPembayaran riwayatBaru = {id, nama, static_cast<int>(barangDibeli.size()), total, waktuPembayaran, barangDibeli};
     riwayat.push_back(riwayatBaru);
+
+    // Menampilkan pesan bahwa penyimpanan riwayat pembayaran berhasil
+    cout << "Riwayat pembayaran berhasil disimpan untuk nama pembeli: " << nama << endl;
+    cout << "Jumlah produk yang dibeli: " << barangDibeli.size() << endl;
+    cout << "Total pembayaran: Rp " << total << endl;
+    cout << "Waktu Pembayaran: " << waktuPembayaran << endl;
 }
 
-// Fungsi untuk melakukan pembayaran
 void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran> &riwayat, int biayaPengiriman) {
     if (keranjang.empty()) {
         cout << "Keranjang kosong, tidak ada pembayaran yang perlu dilakukan." << endl;
@@ -535,6 +540,12 @@ void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran
     cout << right << setw(50) << "Total Pembayaran: Rp" << totalPembayaran << endl;
     cout << string(65, '-') << endl;
 
+    // Meminta nama pembeli
+    string namaPembeli;
+    cout << "Masukkan Nama Pembeli: ";
+    cin.ignore();  // Mengabaikan newline sebelumnya agar getline berfungsi dengan benar
+    getline(cin, namaPembeli);
+
     // Proses pembayaran
     int pilihan;
     cout << "\n1. Bayar" << endl;
@@ -549,7 +560,7 @@ void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran
         string waktuPembayaran = dt;
 
         // Menyimpan riwayat pembayaran dan menghitung ulang total pembayaran
-        simpanRiwayatPembayaran(riwayat, 1, "Nama Pembeli", keranjang, totalPembayaran, waktuPembayaran);
+        simpanRiwayatPembayaran(riwayat, 1, namaPembeli, keranjang, totalPembayaran, waktuPembayaran);
 
         cout << "\nPembayaran berhasil! Total Pembayaran: Rp" << totalPembayaran + biayaPengiriman << endl;
 
@@ -591,6 +602,19 @@ void tampilkanRiwayatPembayaran(const vector<RiwayatPembayaran>& riwayat) {
              << setw(15) << pembayaran.total
              << setw(20) << pembayaran.waktuPembayaran << endl;
     }
+
+    int pilihanMenu1;
+    do
+    {
+        cout << "\n1. Kembali ke Menu Utama" << endl;
+        cout << "Masukkan pilihan: ";
+        cin >> pilihanMenu1;
+
+        if (pilihanMenu1 != 1)
+        {
+            cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
+        }
+    } while (pilihanMenu1 != 1);
 }
 
 // Fungsi untuk menampilkan detail riwayat pembayaran
@@ -620,6 +644,19 @@ void tampilkanDetailRiwayatPembayaran(const vector<RiwayatPembayaran>& riwayat) 
     } else {
         cout << "Index riwayat tidak valid." << endl;
     }
+
+    int pilihanMenu1;
+    do
+    {
+        cout << "\n1. Kembali ke Menu Utama" << endl;
+        cout << "Masukkan pilihan: ";
+        cin >> pilihanMenu1;
+
+        if (pilihanMenu1 != 1)
+        {
+            cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
+        }
+    } while (pilihanMenu1 != 1);
 }
 
 int main()
@@ -707,12 +744,20 @@ int main()
             prosesPembayaran(keranjang, riwayat, biayaPengiriman);
             break;
         case 9:
-            system("cls");
-            tampilkanRiwayatPembayaran(riwayat);
+            // system("cls");
+            if (riwayat.empty()) {
+                cout << "Tidak ada riwayat pembayaran." << endl;
+            } else {
+                tampilkanRiwayatPembayaran(riwayat);
+            }
             break;
         case 10:
-            system("cls");
-            tampilkanDetailRiwayatPembayaran(riwayat);  // Hanya riwayat sebagai parameter            
+            // system("cls");
+            if (riwayat.empty()) {
+                cout << "Tidak ada riwayat pembayaran." << endl;
+            } else {
+                tampilkanDetailRiwayatPembayaran(riwayat);  // Hanya riwayat sebagai parameter
+            }            
             break;
         case 0:
             break;
