@@ -18,6 +18,16 @@ struct KeranjangItem
     int jumlah;
 };
 
+struct RiwayatPembayaran {
+    int id;
+    string nama;
+    int jumlahBarang; // jumlah barang dalam pembayaran
+    int total;        // total harga
+    string waktuPembayaran; // waktu pembayaran
+    vector<KeranjangItem> barangDibeli; // produk yang dibeli
+};
+
+
 class HashTable
 {
 private:
@@ -256,35 +266,36 @@ void tambahKeKeranjang(const vector<Produk> &produk, vector<KeranjangItem> &kera
     } while (pilihanMenu1 != 1 && pilihanMenu1 != 2);
 }
 
-// Fungsi untuk mencari produk berdasarkan ID yang diinput
+//Fungsi untuk mencari peroduk berdasarkan id
 void cariProdukByID(const vector<Produk> &produk)
 {
     int idProduk;
     cout << "Masukkan ID produk yang ingin dicari: ";
     cin >> idProduk;
 
-    bool ditemukan = false;
+    unordered_map<int, Produk> produkMap;
+
     for (const auto &p : produk)
     {
-        if (p.id == idProduk)
-        {
-            cout << "\n======================= Produk Ditemukan ========================" << endl;
-            cout << left << setw(5) << "ID"
-                 << setw(30) << "Nama Produk"
-                 << setw(20) << "Kategori"
-                 << setw(15) << "Harga (Rp)" << endl;
-            cout << "-----------------------------------------------------------------" << endl;
-            cout << left << setw(5) << p.id
-                 << setw(30) << p.nama
-                 << setw(20) << p.kategori
-                 << setw(15) << p.harga << endl;
-            cout << "==================================================================" << endl;
-            ditemukan = true;
-            break;
-        }
+        produkMap[p.id] = p; 
     }
 
-    if (!ditemukan)
+    if (produkMap.find(idProduk) != produkMap.end())
+    {
+        Produk p = produkMap[idProduk];
+        cout << "\n======================= Produk Ditemukan ========================" << endl;
+        cout << left << setw(5) << "ID"
+             << setw(30) << "Nama Produk"
+             << setw(20) << "Kategori"
+             << setw(15) << "Harga (Rp)" << endl;
+        cout << "-----------------------------------------------------------------" << endl;
+        cout << left << setw(5) << p.id
+             << setw(30) << p.nama
+             << setw(20) << p.kategori
+             << setw(15) << p.harga << endl;
+        cout << "==================================================================" << endl;
+    }
+    else
     {
         cout << "\nProduk dengan ID " << idProduk << " tidak ditemukan." << endl;
     }
@@ -462,8 +473,8 @@ int hitungBiayaPengiriman(int biayaPengiriman) {
     }
 
     biayaPengiriman = dist[tujuan] * 3000;
-    cout << "Biaya pengiriman dari supermarket ke titik "<< tujuan << " : Rp." << biayaPengiriman << endl;
-    
+    cout << "Biaya pengiriman dari supermarket ke titik " << tujuan << " : Rp." << biayaPengiriman << endl;
+
     int pilihan;
     while (true) {  
         cout << "\n1. Memperbarui tujuan\n";
@@ -480,131 +491,36 @@ int hitungBiayaPengiriman(int biayaPengiriman) {
         }
     }
 }
-struct RiwayatPembayaran {
-    vector<KeranjangItem> daftarProduk; 
-    int biayaPengiriman;                 
-    int total;                   
-    string tanggal;              
-};
-
-string getTanggalSaatIni() {
-    time_t     now = time(0);
-    struct tm  tstruct;
-    char       buf[80];
-    tstruct = *localtime(&now);
-    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
-    return string(buf);
-}
 
 // Fungsi untuk menyimpan riwayat pembayaran
-void simpanTransaksi(
-    vector<RiwayatPembayaran> &riwayat,
-    const vector<KeranjangItem> &keranjang,
-    int biayaPengiriman,
-    int total,
-    const string &tanggal) 
-{
-    RiwayatPembayaran transaksi;
-    transaksi.daftarProduk = keranjang; 
-    transaksi.biayaPengiriman = biayaPengiriman;
-    transaksi.total = total;
-    transaksi.tanggal = tanggal;
-
-    riwayat.push_back(transaksi);
-}
-
-
-void lihatDetailPembayaran(const RiwayatPembayaran &transaksi) {
-    cout << "\nDetail Pembayaran:" << endl;
-    cout << "Tanggal: " << transaksi.tanggal << endl;
-    cout << left << setw(5) << "No"
-         << setw(20) << "Nama Produk"
-         << setw(10) << "Jumlah"
-         << setw(15) << "Harga (Rp)" << endl;
-    cout << string(50, '-') << endl;
-
-    for (size_t i = 0; i < transaksi.daftarProduk.size(); ++i) {
-        const auto &produk = transaksi.daftarProduk[i];
-        cout << left << setw(5) << i + 1
-             << setw(20) << produk.produk.nama
-             << setw(10) << produk.jumlah
-             << setw(15) << produk.produk.harga << endl;
-    }
-
-    cout << "\nBiaya Pengiriman: Rp" << transaksi.biayaPengiriman << endl;
-    cout << "Total Pembayaran: Rp" << transaksi.total << endl;
-
-    system("pause");
-}
-
-
-void lihatRiwayatPembayaran(const vector<RiwayatPembayaran> &riwayat) {
-    if (riwayat.empty()) {
-        cout << "Tidak ada riwayat pembayaran." << endl;
-        return;
-        system("pause");
-    }
-
-    cout << "\nDaftar Riwayat Pembayaran:" << endl;
-    cout << left << setw(5) << "Idx"
-         << setw(25) << "Tanggal"
-         << setw(15) << "Total (Rp)" << endl;
-    cout << string(40, '-') << endl;
-
-    for (size_t i = 0; i < riwayat.size(); ++i) {
-        cout << left << setw(5) << i + 1
-             << setw(25) << riwayat[i].tanggal
-             << setw(15) << riwayat[i].total << endl;
-    }
-    int pilihanMenu1;
-    do
-    {
-        cout << "\n1. Kembali ke Menu Utama" << endl;
-        cout << "Masukkan pilihan: ";
-        cin >> pilihanMenu1;
-
-        if (pilihanMenu1 != 1)
-        {
-            cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
-        }
-    } while (pilihanMenu1 != 1);
-}
-
-//fungsi untuk memilih indeks transaksi detail pembayaran
-void pilihDanLihatDetailPembayaran(const vector<RiwayatPembayaran> &riwayat) {
-    int pilihRiwayat;
-    cout << "\nMasukkan riwayat pembayaran untuk melihat detail (0 untuk kembali): ";
-    cin >> pilihRiwayat;
-
-    if (pilihRiwayat == 0) {
-        return;
-    } else if (pilihRiwayat > 0 && pilihRiwayat <= riwayat.size()) {
-        lihatDetailPembayaran(riwayat[pilihRiwayat - 1]);
-    } else {
-        cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
-    }
+void simpanRiwayatPembayaran(vector<RiwayatPembayaran>& riwayat, int id, const string& nama, const vector<KeranjangItem>& barangDibeli, int total, const string& waktuPembayaran) {
+    // Membuat riwayat baru dan menyimpannya ke dalam vector riwayat
+    RiwayatPembayaran riwayatBaru = {id, nama, static_cast<int>(barangDibeli.size()), total, waktuPembayaran, barangDibeli};
+    riwayat.push_back(riwayatBaru);
 }
 
 // Fungsi untuk melakukan pembayaran
 void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran> &riwayat, int biayaPengiriman) {
     if (keranjang.empty()) {
         cout << "Keranjang kosong, tidak ada pembayaran yang perlu dilakukan." << endl;
-        system("pause");
         return;
     }
+
+    // Jika biaya pengiriman belum dihitung, hitung biaya pengiriman
     if (biayaPengiriman == 0) {
         biayaPengiriman = hitungBiayaPengiriman(biayaPengiriman);
     }
 
     int totalPembayaran = 0;
-    cout << "\nProses Pembayaran:" << endl;
+    cout << "\nProses Pembayaran: " << endl;
     cout << left << setw(5) << "ID"
          << setw(30) << "Nama Produk"
          << setw(15) << "Jumlah"
          << setw(15) << "Subtotal (Rp)" << endl;
     cout << string(65, '-') << endl;
 
-    for (const auto &item : keranjang) {
+    // Menampilkan informasi produk dalam keranjang dan menghitung total
+    for (const auto& item : keranjang) {
         int subtotal = item.produk.harga * item.jumlah;
         totalPembayaran += subtotal;
 
@@ -614,11 +530,13 @@ void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran
              << setw(15) << subtotal << endl;
     }
 
+    // Menambahkan biaya pengiriman ke total pembayaran
     totalPembayaran += biayaPengiriman;
     cout << right << setw(50) << "Biaya Pengiriman: Rp" << biayaPengiriman << endl;
     cout << right << setw(50) << "Total Pembayaran: Rp" << totalPembayaran << endl;
     cout << string(65, '-') << endl;
 
+    // Proses pembayaran
     int pilihan;
     cout << "\n1. Bayar" << endl;
     cout << "2. Kembali ke menu utama" << endl;
@@ -626,19 +544,85 @@ void prosesPembayaran(vector<KeranjangItem> &keranjang, vector<RiwayatPembayaran
     cin >> pilihan;
 
     if (pilihan == 1) {
-        string tanggal = getTanggalSaatIni();
+        // Mendapatkan waktu saat ini
+        time_t sekarang = time(0);
+        char* dt = ctime(&sekarang);
+        string waktuPembayaran = dt;
 
-        simpanTransaksi(riwayat, keranjang, biayaPengiriman, totalPembayaran, tanggal);
+        // Menyimpan riwayat pembayaran dan menghitung ulang total pembayaran
+        simpanRiwayatPembayaran(riwayat, 1, "Nama Pembeli", keranjang, totalPembayaran, waktuPembayaran);
 
-        cout << "\nPembayaran berhasil! Total Pembayaran: Rp" << totalPembayaran << endl;
+        cout << "\nPembayaran berhasil! Total Pembayaran: Rp" << totalPembayaran + biayaPengiriman << endl;
+
+        // Hapus produk dari keranjang setelah pembayaran berhasil
         keranjang.clear();
-        system("pause");
+
+        // Pilihan untuk kembali ke menu utama setelah pembayaran
+        int pilihanMenu1;
+        do {
+            cout << "\n1. Kembali ke Menu Utama" << endl;
+            cout << "Masukkan pilihan: ";
+            cin >> pilihanMenu1;
+
+            if (pilihanMenu1 != 1) {
+                cout << "Pilihan tidak valid. Silakan coba lagi." << endl;
+            }
+        } while (pilihanMenu1 != 1);
     } else if (pilihan == 2) {
         return;
     } else {
         cout << "\nPilihan tidak valid, coba lagi.\n";
     }
 }
+
+void tampilkanRiwayatPembayaran(const vector<RiwayatPembayaran>& riwayat) {
+    // Menampilkan header
+    cout << left << setw(5) << "ID"
+         << setw(30) << "Nama Pembeli"
+         << setw(15) << "Jumlah Barang"
+         << setw(15) << "Total Pembayaran"
+         << setw(20) << "Waktu Pembayaran" << endl;
+    cout << string(85, '-') << endl;
+
+    // Menampilkan setiap riwayat pembayaran
+    for (const auto& pembayaran : riwayat) {
+        cout << left << setw(5) << pembayaran.id
+             << setw(30) << pembayaran.nama
+             << setw(15) << pembayaran.jumlahBarang
+             << setw(15) << pembayaran.total
+             << setw(20) << pembayaran.waktuPembayaran << endl;
+    }
+}
+
+// Fungsi untuk menampilkan detail riwayat pembayaran
+void tampilkanDetailRiwayatPembayaran(const vector<RiwayatPembayaran>& riwayat) {
+    int index;
+    cout << "Masukkan index riwayat pembayaran yang ingin ditampilkan: ";
+    cin >> index;
+    if (index < 0 || index >= riwayat.size()) {
+    cout << "Index tidak valid. Silakan coba lagi." << endl;
+    return;
+    }
+
+    if (index >= 0 && index < riwayat.size()) {
+        const RiwayatPembayaran& pembayaran = riwayat[index];
+        cout << "ID Pembayaran: " << pembayaran.id << endl;
+        cout << "Nama Pembeli: " << pembayaran.nama << endl;
+        cout << "Jumlah Barang: " << pembayaran.jumlahBarang << endl;
+        cout << "Total Pembayaran: " << pembayaran.total << endl;
+        cout << "Waktu Pembayaran: " << pembayaran.waktuPembayaran << endl;
+
+        cout << "\nDaftar Barang yang Dibeli: " << endl;
+        for (const auto& item : pembayaran.barangDibeli) {
+            cout << "Produk: " << item.produk.nama
+                 << " Jumlah: " << item.jumlah
+                 << " Harga: Rp" << item.produk.harga << endl;
+        }
+    } else {
+        cout << "Index riwayat tidak valid." << endl;
+    }
+}
+
 int main()
 {
     vector<Produk> produk = {
@@ -725,11 +709,11 @@ int main()
             break;
         case 9:
             system("cls");
-            lihatRiwayatPembayaran(riwayat);
+            tampilkanRiwayatPembayaran(riwayat);
             break;
         case 10:
             system("cls");
-            pilihDanLihatDetailPembayaran(riwayat);
+            tampilkanDetailRiwayatPembayaran(riwayat);  // Hanya riwayat sebagai parameter            
             break;
         case 0:
             break;
