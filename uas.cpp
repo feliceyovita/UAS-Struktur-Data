@@ -760,6 +760,7 @@ int main()
                 cout << "Tidak ada riwayat pembayaran." << endl;
                 cin.ignore(); 
                 cin.get();  
+            }else {
                 tampilkanDetailRiwayatPembayaran(riwayat); 
             }
         case 0:
